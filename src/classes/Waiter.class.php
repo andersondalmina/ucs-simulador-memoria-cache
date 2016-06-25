@@ -56,6 +56,16 @@ class Waiter {
             return $response->withHeader('Location', '/');
         }
     }
+
+    public function calcularParteEndereco($int){
+        $tamanho = 0;
+        while($int != 1){
+            $int = $int / 2;
+            $tamanho++;
+        }
+
+        return $tamanho;
+    }
 }
 
 ?>

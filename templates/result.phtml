@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Cache Simulator</title>
+        <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="/assets/css/custom.css"/>
+    </head>
+    <body>
+        <br/>
+        <div class="container">
+            <div class="jumbotron">
+                <h1>Simulador de Memória Cache</h1>
+                <p>Essa aplicação realiza uma simulação de memória cache mapeada em conjuntos.</p>
+                <h3>Resultado da Simulação.</h3>
+                <div class="form-horizontal">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> 
+                            <h3 class="panel-title">Configurações da Simulação</h3> 
+                        </div> 
+                        <div class="panel-body"> 
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Tamanho da Linha:</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['tamanho_linha']; ?> bits" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="input_num_linhas">Número de Linhas</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['numero_linhas']; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Linhas por Conjuntos</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['linhas_conjunto']; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Tempo de acesso da Memória Principal</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['tempo_memoria_principal']; ?>ns" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="input_tempo_cache">Tempo de Acesso</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['tempo_cache']; ?>ns" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Política de Escrita</label>
+                                    <div class="col-sm-6">
+                                        <?php 
+                                            if($params['politica_escrita'] == 0):
+                                        ?>
+                                        <input type="text" class="form-control" value="Write-Through" disabled>
+                                        <?php 
+                                            else:
+                                        ?>
+                                        <input type="text" class="form-control" value="Write-Back" disabled>
+                                        <?php 
+                                            endif;
+                                        ?>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Política de Substituição</label>
+                                    <div class="col-sm-6">
+                                        <?php 
+                                            if($params['politica_escrita'] == 0):
+                                        ?>
+                                        <input type="text" class="form-control" value="LRU" disabled>
+                                        <?php 
+                                            else:
+                                        ?>
+                                        <input type="text" class="form-control" value="Aleatória" disabled>
+                                        <?php 
+                                            endif;
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="panel panel-primary">
+                        <div class="panel-heading"> 
+                            <h3 class="panel-title">Resultados na Memória Cache</h3> 
+                        </div> 
+                        <div class="panel-body">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Leituras</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_leituras; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Acertos</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_leituras_acertos; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Taxa de Acerto</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_leituras_acertos_taxa; ?>%" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Escritas</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Acertos</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas_acertos; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Taxa de Acerto</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas_acertos_taxa; ?>%" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Taxa de Acerto Total</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_taxa_acerto_total; ?>%" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Tempo Médio</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas_acertos; ?>" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-primary">
+                        <div class="panel-heading"> 
+                            <h3 class="panel-title">Resultados na Memória Principal</h3> 
+                        </div> 
+                        <div class="panel-body">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Leituras</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_leituras; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Razão</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_leituras_acertos; ?>" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Escritas</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Razão</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas_acertos; ?>" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Acessos</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $cache_escritas; ?>" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/vendor/jquery/dist/jquery.min.js"></script>
+        <script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    </body>
+</html>

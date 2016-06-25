@@ -3,7 +3,7 @@
 class Linha {
     private $rotulo;
     private $endereco;
-    private $lru;
+    private $ultima_utilizacao;
 
     public function __construct(){
         $this->rotulo = null;
@@ -27,12 +27,12 @@ class Linha {
         $this->endereco = $endereco;
     }
 
-    public function setLru($lru){
-        $this->lru = $lru;
+    public function setUltimaUtilizacao($ultima_utilizacao){
+        $this->ultima_utilizacao = $ultima_utilizacao;
     }
 
-    public function getLru(){
-        return $this->lru;
+    public function getUltimaUtilizacao(){
+        return $this->ultima_utilizacao;
     }
 }
 ?>

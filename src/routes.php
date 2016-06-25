@@ -18,6 +18,7 @@ $app->post('/process', function($request, $response, $args){
 	//Valida formulário
 	$waiter->validate($request);
 	
+    //Recebe parametros para a simulação
 	$params['politica_escrita'] = $request->getParam('politica_escrita');
 	$params['politica_substituicao'] = $request->getParam('politica_substituicao');
 	$params['numero_linhas'] = $request->getParam('numero_linhas');
@@ -32,41 +33,38 @@ $app->post('/process', function($request, $response, $args){
 	//Quantidade de Conjuntos
     $quantidade_conjuntos = ceil($params['numero_linhas'] / $params['linhas_conjunto']);
 
-    //Tamanho de cada parte do endereco
-    $aux = $quantidade_conjuntos;
-    $tamanho_conjunto = 0;
-    while($aux != 1){
-        $aux = $aux / 2;
-        $tamanho_conjunto++;
-    }
+    //Calcula o tamanho do conjunto
+    $tamanho_conjunto = $waiter->calcularParteEndereco($quantidade_conjuntos);
 
-    $aux = $params['tamanho_linha'];
-    $tamanho_palavra = 0;
-    while($aux != 1){
-        $aux = $aux / 2;
-        $tamanho_palavra++;
-    }
-
-    //Calcula o rótulo
+    //Calcula o tamanho da palavra
+    $tamanho_palavra = $waiter->calcularParteEndereco($params['tamanho_linha']);
+    
+    //Calcula o tamanho do rótulo
 	$tamanho_rotulo = 32 - ($tamanho_palavra + $tamanho_conjunto);
 
 	$memoriaPrincipal = new MemoriaPrincipal;
 	$memoriaCache = new MemoriaCache($quantidade_conjuntos, $params['linhas_conjunto']);
 
-	$leituras = 0;
-    $escritas = 0;
-    $leiturasNaCache = 0;
-    $leiturasNaMP = 0;
-    $escritasNaCache = 0;
-    $escritasNaMP = 0;
-    $naoEncontrouNaCacheLeitura = 0;
-    $encontrouNaCacheLeitura = 0;
-    $naoEncontrouNaCacheEscrita = 0;
-    $encontrouNaCacheEscrita = 0;
-    $naoEncontrouNaMPLeitura = 0;
-    $encontrouNaMPLeitura = 0;
-    $naoEncontrouNaMPEscrita = 0;
-    $encontrouNaMPEscrita = 0;
+    $resultados = [
+        'params' => $params,
+        'leituras' => 0,
+        'escritas' => 0,
+        'total_operacoes' =>  0,
+        'cache_leituras' => 0,
+        'cache_leituras_acertos' => 0,
+        'cache_leituras_acertos_taxa' => 0,
+        'cache_escritas' => 0,
+        'cache_escritas_acertos' => 0,
+        'cache_escritas_acertos_taxa' => 0,
+        'cache_total_operacoes' => 0,
+        'cache_taxa_acerto_total' => 0,
+        'memoria_principal_leituras' => 0,
+        'memoria_principal_leituras_acertos' => 0,
+        'memoria_principal_escritas' => 0,
+        'memoria_principal_escritas_acertos' => 0,
+        'memoria_principal_total_operacoes' => 0,
+        'tempo_medio' => 0
+    ];
 
 	$address = $waiter->readFile('teste.cache');
 
@@ -78,127 +76,128 @@ $app->post('/process', function($request, $response, $args){
         $endereco = str_pad($endereco, 32, "0", STR_PAD_LEFT);
 
         //Busca os endereços
-        $rotuloEndereco = substr($endereco, 0, $tamanho_rotulo);
-        $enderecoConjunto = substr($endereco, $tamanho_rotulo + 1, $tamanho_conjunto);
+        $endereco_rotulo = substr($endereco, 0, $tamanho_rotulo);
+        $endereco_conjunto = substr($endereco, $tamanho_rotulo + 1, $tamanho_conjunto);
 
         if($operacao == "R"){
-            $leituras++;
+            $resultados['leituras']++;
             
             //procura na cache o endereço do conjunto
-            $conjunto = $memoriaCache->procuraConjunto($enderecoConjunto);
+            $conjunto = $memoriaCache->procuraConjunto($endereco_conjunto);
 
-            //Contador de leituras
-            $leiturasNaCache++;
+            //Soma um na leitura na cache
+            $resultados['cache_leituras']++;
 
+            //Se conjunto existe na cache
             if($conjunto != null){
-                //Procura rotulo pelo conjunto encontrado
-                $retornoRotulo = $conjunto->procuraRotulo($rotuloEndereco);
-                if(!is_null($retornoRotulo)){
-                    //Se encontrou o rótulo ocorre hit
-                    $encontrouNaCacheLeitura++;
+                //Procura o rotulo do conjunto
+                $conjunto_rotulo = $conjunto->procuraRotulo($endereco_rotulo);
+                
+                //Se rótulo existe
+                if(!is_null($conjunto_rotulo)){
+                    //Soma um no acertos de leitura da cache
+                    $resultados['cache_leituras_acertos']++;
                 }else{
-                    //caso não encontrou o rótulo da erro
-                    $naoEncontrouNaCacheLeitura++;
-                    $conjunto->gravaRotulo($rotuloEndereco, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+                    //Se rótulo não existe grava
+                    $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
 
-                    $leiturasNaMP++;
-                    $encontrouNaMPLeitura++;
+                    //Soma um na leitura da memória principal
+                    $resultados['memoria_principal_leituras']++;
+                    $resultados['memoria_principal_leituras_acertos']++;
                 }
             } else {
-                $naoEncontrouNaCacheLeitura++;
-                $conjunto = $memoriaCache->gravaConjunto($enderecoConjunto);
+                //Se conjunto não existe grava
+                $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto);
+
                 if(!is_null($conjunto)){
-	                $conjunto->gravaRotulo($rotuloEndereco, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+	                $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
 	        	}
 
-                $leiturasNaMP++;
-                $encontrouNaMPLeitura++;
+                //Soma um na leitura da memória principal
+                $resultados['memoria_principal_leituras']++;
+                $resultados['memoria_principal_leituras_acertos']++;
             }
 
         } else {
-            $escritas++;
+            $resultados['escritas']++;
+            
             if($params['politica_escrita'] == 0){ //Write Through
-                $conjunto = $memoriaCache->procuraConjunto($enderecoConjunto);
-                $escritasNaCache++;
+                $conjunto = $memoriaCache->procuraConjunto($endereco_conjunto);
+
+                $resultados['cache_escritas']++;
+
                 if(is_null($conjunto)){
-                    $conjunto = $memoriaCache->gravaConjunto($enderecoConjunto);
+                    $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto);
                     if(!is_null($conjunto)){
-                    	$conjunto->gravaRotulo($rotuloEndereco, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+                    	$conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
                 	}
-                    $naoEncontrouNaCacheEscrita++;
+                    
                 }else{
-                    $retornoRotulo = $conjunto->procuraRotulo($rotuloEndereco);
+                    $retornoRotulo = $conjunto->procuraRotulo($endereco_rotulo);
                     if(!$retornoRotulo){
-                        $conjunto->gravaRotulo($rotuloEndereco, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-                        $naoEncontrouNaCacheEscrita++;
+                        $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+                        
                     }else{
-                        $encontrouNaCacheEscrita++;
+                        $resultados['cache_escritas_acertos']++;
                     }
                 }
-                $escritasNaMP++;
-                $encontrouNaMPEscrita++;
+                $resultados['memoria_principal_escritas']++;
+                $resultados['memoria_principal_escritas_acertos']++;
             }else{ //Write Back
-                $conjunto = $memoriaCache->procuraConjunto($enderecoConjunto);
-                $escritasNaCache++;
+                $conjunto = $memoriaCache->procuraConjunto($endereco_conjunto);
+
+                $resultados['cache_escritas']++;
+                
                 if(is_null($conjunto)){
-                    $conjunto = $memoriaCache->gravaConjunto($enderecoConjunto); 
+                    $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto); 
                     if(!is_null($conjunto)){
-                    	$conjunto->gravaRotulo($rotuloEndereco, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+                    	$conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
                 	}
-                    $naoEncontrouNaCacheEscrita++;
+                    
                 }else{
-                    $retornoRotulo = $conjunto->procuraRotulo($rotuloEndereco);
+                    $retornoRotulo = $conjunto->procuraRotulo($endereco_rotulo);
                     if(!$retornoRotulo){
-                        $conjunto->gravaRotulo($rotuloEndereco, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-                        $naoEncontrouNaCacheEscrita++;
+                        $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+                        
                     }else{
-                        $encontrouNaCacheEscrita++;
+                        $resultados['cache_escritas_acertos']++;
                     }
                 }
             }
         }
-	}
+	} 
 
-	$totalDeRegistros = $leituras + $escritas;
-    
-    var_dump("Total de Escritas: ".$escritas);
-    var_dump("Total de Leituras: ".$leituras);
-    var_dump("Total de Registros: ".$totalDeRegistros);
-    
-    var_dump("Total de Leituras na Cache: ".$leiturasNaCache);
-	var_dump("Total de Escritas na Cache:" .$escritasNaCache);
-	
-	var_dump("Total de Leituras na MP:" .$leiturasNaMP);
-    var_dump("Total de Escritas na MP:" .$escritasNaMP);
 
-    var_dump("Total de Operacoes na Cache: ".($leiturasNaCache+$escritasNaCache));
-	var_dump("Total de Operacoes na MP: ".($leiturasNaMP+$escritasNaMP));
+    //RESULTADOS
+    $resultados['total_operacoes'] = $resultados['leituras'] + $resultados['escritas'];
 
-    //Acerto Leitura Cache
-    $taxaDeAcertoCacheLeitura = ($encontrouNaCacheLeitura*100)/$leiturasNaCache;
-    var_dump("Taxa de Acerto na Cache (Leitura): ".($encontrouNaCacheLeitura." - ".($taxaDeAcertoCacheLeitura))."%");
+    $resultados['cache_leituras_acertos_taxa'] = number_format(($resultados['cache_leituras_acertos']*100)/$resultados['cache_leituras'], 4, '.', '');
 
-    //Erro Leitura Cache 
-    $taxaDeErroCacheLeitura = ($naoEncontrouNaCacheLeitura*100)/$leiturasNaCache;
-    var_dump("Taxa de Erro na Cache (Leitura): ".($naoEncontrouNaCacheLeitura." - ".($taxaDeErroCacheLeitura))."%");
+    //Operações de escrita na cache
+    $resultados['cache_escritas_acertos_taxa'] = number_format(($resultados['cache_escritas_acertos']*100)/$resultados['cache_escritas'], 4, '.', '');
 
-    //Erro Escrita Cache
-    $taxaDeErroCacheEscrita = ($naoEncontrouNaCacheEscrita*100)/$escritasNaCache;
-    var_dump("Taxa de Erro na Cache (Escrita): ".($naoEncontrouNaCacheEscrita." - ".($taxaDeErroCacheEscrita))."%");
+    $resultados['total_operacoes_cache'] = $resultados['cache_leituras'] + $resultados['cache_escritas'];
+
+    $cache_taxa_acerto_total = (($resultados['cache_leituras_acertos'] + $resultados['cache_escritas_acertos']) * 100) /$resultados['total_operacoes_cache'];
+
+    $resultados['cache_taxa_acerto_total'] = number_format($cache_taxa_acerto_total, 4, '.', '');
+
+
+    //Operações de leitura na memória principal
+    $resultados['memoria_principal_leitura_acertos_taxa'] = number_format(($resultados['memoria_principal_leituras_acertos']*100)/$resultados['memoria_principal_leituras'], 4, '.', '');
+
+
+    //Operações de escrita na memória principal
+    $resultados['memoria_principal_escrita_acertos_taxa'] = number_format(($resultados['memoria_principal_escritas_acertos']*100)/$resultados['memoria_principal_escritas'], 4, '.', '');
+
+    $resultados['total_operacoes_memoria_principal'] = $resultados['memoria_principal_leituras'] + $resultados['memoria_principal_escritas'];
+
     
-    //Acerto Escrita Cache
-    $taxaDeAcertoCacheEscrita = ($encontrouNaCacheEscrita*100)/$escritasNaCache;
-    var_dump("Taxa de Acerto na Cache (Escrita): ".($encontrouNaCacheEscrita." - ".($taxaDeAcertoCacheEscrita))."%");
-    
-    $taxaDeAcertoMPLeitura = ($encontrouNaMPLeitura*100)/$leiturasNaMP;
-    var_dump("Taxa de Acerto na MP (Leitura): ".($encontrouNaMPLeitura." - ".($taxaDeAcertoMPLeitura))."%");
-    
-    //Erro Leitura MP
-    $taxaDeErroMPLeitura = ($naoEncontrouNaMPLeitura*100)/$leiturasNaMP;
-    var_dump("Taxa de Erro na MP (Leitura): ".($naoEncontrouNaMPLeitura." - ".($taxaDeErroMPLeitura))."%");
-    
-    $tempoMedio = ((($taxaDeAcertoCacheLeitura/100) * $params['tempo_cache']) +
-            ((1 - ($taxaDeAcertoCacheLeitura/100)) * ($params['tempo_cache'] + $params['tempo_memoria_principal'])));
-    
-    var_dump("Tempo médio de acesso: ".$tempoMedio);
+    //Calculo do tempo médio de acesso
+    $tempoMedio = ((($resultados['cache_leituras_acertos_taxa']/100) * $params['tempo_cache']) +
+            ((1 - ($resultados['cache_leituras_acertos_taxa']/100)) * ($params['tempo_cache'] + $params['tempo_memoria_principal'])));
+
+    $resultados['tempoMedio'] = $tempoMedio;
+
+    return $this->renderer->render($response, 'result.phtml', $resultados);
 });

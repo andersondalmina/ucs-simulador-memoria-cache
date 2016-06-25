@@ -37,7 +37,7 @@ class Conjunto {
         for($i = 0; $i < $this->prox; $i++){
             if($this->linhas[$i]->getRotulo() == $rotulo){
                 $data = Carbon::now()->timestamp;
-                $this->linhas[$i]->setLru($data);
+                $this->linhas[$i]->setUltimaUtilizacao($data);
                 
                 return true;
             }
@@ -58,7 +58,7 @@ class Conjunto {
                 }
 
                 $this->linhas[$linhaMenosRecUsada]->setRotulo($rotulo, $endereco);
-                $this->linhas[$linhaMenosRecUsada]->setLru($data);
+                $this->linhas[$linhaMenosRecUsada]->setUltimaUtilizacao($data);
             } else { //Aleatorio
                 $linhaAleatoria = rand(0, $this->tamanho);
 
@@ -67,22 +67,22 @@ class Conjunto {
                 }
 
                 $this->linhas[$linhaAleatoria]->setRotulo($rotulo, $endereco);
-                $this->linhas[$linhaAleatoria]->setLru($data);
+                $this->linhas[$linhaAleatoria]->setUltimaUtilizacao($data);
             }
         } else {
             $this->linhas[$this->prox] = new Linha();
             $this->linhas[$this->prox]->setRotulo($rotulo, $endereco);
-            $this->linhas[$this->prox]->setLru($data);
+            $this->linhas[$this->prox]->setUltimaUtilizacao($data);
             $this->prox++;
         }
     }
     
     public function buscaUltimaUsada(){
-        $aux = $this->linhas[0]->getLru();
+        $aux = $this->linhas[0]->getUltimaUtilizacao();
         $menosUsado = 0;
         for($i = 0; $i < $this->tamanho; $i++){
-            if($this->linhas[$i]->getLru() < $aux){
-                $aux = $this->linhas[$i]->getLru();
+            if($this->linhas[$i]->getUltimaUtilizacao() < $aux){
+                $aux = $this->linhas[$i]->getUltimaUtilizacao();
                 $menosUsado = $i;
             }
         }
