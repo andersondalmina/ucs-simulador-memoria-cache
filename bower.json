@@ -1,0 +1,25 @@
+{
+  "name": "Cache",
+  "description": "Memory Cache Simulator",
+  "main": "index.php",
+  "keywords": [
+    "cache",
+    "simulator"
+  ],
+  "authors": [
+    "Ânderson Zorrer Dalmina"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "bootstrap": "^3.3.6"
+  }
+}

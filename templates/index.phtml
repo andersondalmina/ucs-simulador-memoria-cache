@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Cache Simulator</title>
+        <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="/assets/css/custom.css"/>
+    </head>
+    <body>
+        <br/>
+        <div class="container">
+            <div class="jumbotron">
+                <h1>Simulador de Memória Cache</h1>
+                <p>Essa aplicação realiza uma simulação de memória cache mapeada em conjuntos.</p>
+                <p>Suas configurações podem ser alteradas nos campos abaixo.</p>
+                <?php 
+                    if(count($message) > 0):
+                ?>
+                    <div role="alert" class="alert alert-danger"> 
+                    <?php 
+                        var_dump($message)."<br />";   
+                        foreach($message as $cada_message){
+                            var_dump($cada_message[0])."<br />";   
+                        }
+                    ?>
+                    </div>
+                <?php
+                    endif;
+                ?>
+                <form class="form-horizontal" action="/process" method="POST">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> 
+                            <h3 class="panel-title">Configurações da Memória Cache</h3> 
+                        </div> 
+                        <div class="panel-body"> 
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="input_tam_linha" class="col-sm-4 control-label">Tamanho da Linha</label>
+                                    <div class="col-sm-6">
+                                        <input type="number" name="tamanho_linha" class="form-control" id="input_tam_linha" min="0" placeholder="Tamanho da Linha">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input_num_linhas" class="col-sm-4 control-label">Número de Linhas</label>
+                                    <div class="col-sm-6">
+                                        <input type="number" name="numero_linhas" class="form-control" id="input_num_linhas" min="0" placeholder="Número de Linhas">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input_linhas_conjuntos" class="col-sm-4 control-label">Linhas por Conjuntos</label>
+                                    <div class="col-sm-6">
+                                        <input type="number" name="linhas_conjunto" class="form-control" id="input_linhas_conjuntos" min="0" placeholder="Linhas por Conjuntos">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="input_tempo_cache" class="col-sm-4 control-label">Tempo de Acesso</label>
+                                    <div class="col-sm-6">
+                                        <input type="number" name="tempo_cache" class="form-control" id="input_tempo_cache" min="0" placeholder="Tempo de Acesso">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Política de Escrita</label>
+                                    <div class="col-sm-6">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="politica_escrita" value="0" checked>Write-Through
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="politica_escrita" value="1">Write-Back
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Política de Substituição</label>
+                                    <div class="col-sm-6">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="politica_substituicao" value="0" checked>LRU
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="politica_substituicao" value="1">Aleatória
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> 
+                            <h3 class="panel-title">Configurações da Memória Principal</h3> 
+                        </div> 
+                        <div class="panel-body">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="input_tempo_memoria_principal" class="col-sm-4 control-label">Tempo de Acesso</label>
+                                    <div class="col-sm-6">
+                                        <input type="number" name="tempo_memoria_principal" class="form-control" id="input_tempo_memoria_principal" min="0" placeholder="Tempo de acesso">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-6">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">Iniciar Simulação</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script src="/vendor/jquery/dist/jquery.min.js"></script>
+        <script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    </body>
+</html>
