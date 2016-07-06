@@ -21,7 +21,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
 	//Valida formulário
 	$validou = $waiter->validate($request);
     if($validou == false){
-        $this->flash->addMessage('message', 'Informações inválidas. Verifique se foi preenchido todo o formulário e se os campos (Tamanho da Linha, Número de Linhas) são potências de 2.');
+        $this->flash->addMessage('message', 'Informações inválidas. Verifique se foi preenchido todo o formulário e se os campos (Tamanho da Linha, Número de Linhas, Linhas por Conjunto) são potências de 2.');
 
         return $response->withHeader('Location', '/');
     }
@@ -77,7 +77,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
         'tempo_medio' => 0
     ];
 
-	$address = $waiter->readFile('teste.cache');
+	$address = $waiter->readFile('oficial.cache');
     $params['linhas_arquivo'] = count($address);
 
 	foreach($address as $key => $options){
@@ -104,12 +104,12 @@ $app->post('/process', function($request, $response, $args) use ($app){
             $resultados['cache_leituras']++;
 
             //Se conjunto existe na cache
-            if($conjunto != null){
+            if(!is_null($conjunto)){
                 //Procura o rotulo das linhas do conjunto
                 $conjunto_rotulo = $conjunto->procuraRotulo($endereco_rotulo);
-                
+
                 //Se rótulo existe
-                if(!is_null($conjunto_rotulo)){
+                if($conjunto_rotulo == true){
                     //Soma um no acertos de leitura da cache
                     $resultados['cache_leituras_acertos']++;
                 } else {
@@ -156,7 +156,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
             $resultados['cache_escritas']++;
 
             if($params['politica_escrita'] == 0){ //Write Through
-                if(is_null($conjunto)){
+                if($conjunto == false){
                     $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto);
                     $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
 
@@ -174,7 +174,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
                 $resultados['memoria_principal_escritas']++;
                 $resultados['memoria_principal_escritas_acertos']++;
             } else { //Write Back
-                if(is_null($conjunto)){
+                if($conjunto == false){
                     $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto); 
                 	$dirty_bit = $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
 
@@ -208,14 +208,6 @@ $app->post('/process', function($request, $response, $args) use ($app){
     $cache_taxa_acerto_total = (($resultados['cache_leituras_acertos'] + $resultados['cache_escritas_acertos']) * 100) /$resultados['total_operacoes_cache'];
 
     $resultados['cache_taxa_acerto_total'] = number_format($cache_taxa_acerto_total, 4, '.', '');
-
-
-    //Operações de leitura na memória principal
-    $resultados['memoria_principal_leitura_acertos_taxa'] = number_format(($resultados['memoria_principal_leituras_acertos']*100)/$resultados['memoria_principal_leituras'], 4, '.', '');
-
-
-    //Operações de escrita na memória principal
-    $resultados['memoria_principal_escrita_acertos_taxa'] = number_format(($resultados['memoria_principal_escritas_acertos']*100)/$resultados['memoria_principal_escritas'], 4, '.', '');
 
     $resultados['total_operacoes_memoria_principal'] = $resultados['memoria_principal_leituras'] + $resultados['memoria_principal_escritas'];
 

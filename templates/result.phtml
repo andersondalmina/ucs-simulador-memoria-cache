@@ -15,83 +15,94 @@
                 <p>Essa aplicação realiza uma simulação de memória cache mapeada em conjuntos.</p>
                 <h3>Resultado da Simulação.</h3>
                 <div class="form-horizontal">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"> 
-                            <h3 class="panel-title">Configurações da Simulação</h3> 
-                        </div> 
-                        <div class="panel-body"> 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">Tamanho da Linha:</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $params['tamanho_linha']; ?> bits" disabled>
+                    <form action="/process" method="POST">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"> 
+                                <h3 class="panel-title">Configurações da Simulação</h3> 
+                            </div> 
+                            <div class="panel-body"> 
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Tamanho da Linha:</label>
+                                        <div class="col-sm-6">
+                                            <input type="number" class="form-control" name="tamanho_linha" value="<?php echo $params['tamanho_linha']; ?>" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="input_num_linhas">Número de Linhas</label>
+                                        <div class="col-sm-6">
+                                            <input type="number" class="form-control" name="numero_linhas" value="<?php echo $params['numero_linhas']; ?>" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Linhas por Conjuntos</label>
+                                        <div class="col-sm-6">
+                                            <input type="number" name="linhas_conjunto" class="form-control" value="<?php echo $params['linhas_conjunto']; ?>" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Tempo de acesso da Memória Principal</label>
+                                        <div class="col-sm-6">
+                                            <input type="number" name="tempo_memoria_principal" class="form-control" id="input_tempo_memoria_principal" min="0" value="<?php echo $params['tempo_memoria_principal']; ?>" placeholder="Tempo de acesso" required>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label" for="input_num_linhas">Número de Linhas</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $params['numero_linhas']; ?>" disabled>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label" for="input_tempo_cache">Tempo de Acesso</label>
+                                        <div class="col-sm-6">
+                                            <input type="number" name="tempo_cache" class="form-control" value="<?php echo $params['tempo_cache']; ?>" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Política de Escrita</label>
+                                        <div class="col-sm-6">
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="politica_escrita" value="0" <?php if($params['politica_escrita'] == 0) echo 'checked'; ?>> Write-Through
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="politica_escrita" value="1" <?php if($params['politica_escrita'] == 1) echo 'checked'; ?>>Write-Back
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Política de Substituição</label>
+                                        <div class="col-sm-6">
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="politica_substituicao" value="0" <?php 
+                                                if($params['politica_substituicao'] == 0) echo 'checked'; ?>>LFU
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="politica_substituicao" value="1" <?php 
+                                                if($params['politica_substituicao'] == 1) echo 'checked'; ?>>LRU
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="politica_substituicao" value="2" <?php 
+                                                if($params['politica_substituicao'] == 2) echo 'checked'; ?>>Aleatória
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Linhas por Conjuntos</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $params['linhas_conjunto']; ?>" disabled>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Tempo de acesso da Memória Principal</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $params['tempo_memoria_principal']; ?>ns" disabled>
-                                    </div>
-                                </div>
+                            </div> 
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-6">
+                                <button type="submit" class="btn btn-primary btn-lg btn-block">Refazer Simulação</button>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label" for="input_tempo_cache">Tempo de Acesso</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $params['tempo_cache']; ?>ns" disabled>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">Política de Escrita</label>
-                                    <div class="col-sm-6">
-                                        <?php 
-                                            if($params['politica_escrita'] == 0):
-                                        ?>
-                                        <input type="text" class="form-control" value="Write-Through" disabled>
-                                        <?php 
-                                            else:
-                                        ?>
-                                        <input type="text" class="form-control" value="Write-Back" disabled>
-                                        <?php 
-                                            endif;
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">Política de Substituição</label>
-                                    <div class="col-sm-6">
-                                        <?php 
-                                            if($params['politica_substituicao'] == 0):
-                                        ?>
-                                        <input type="text" class="form-control" value="LFU" disabled>
-                                        <?php 
-                                            elseif($params['politica_substituicao'] == 1):
-                                        ?>
-                                        <input type="text" class="form-control" value="LRU" disabled>
-                                        <?php 
-                                            else:
-                                        ?>
-                                        <input type="text" class="form-control" value="Aleatória" disabled>
-                                        <?php 
-                                            endif;
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> 
-                    </div>
+                        </div>
+                        <br />
+                    </form>
                     <div class="panel panel-default">
                         <div class="panel-heading"> 
                             <h3 class="panel-title">Informações do Arquivo</h3> 

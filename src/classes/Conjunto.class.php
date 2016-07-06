@@ -56,7 +56,7 @@ class Conjunto {
                 $num_linha = $this->getLinhaLRU();
             
             } else { //aleatoria
-                $num_linha = rand(0, count($this->linhas));
+                $num_linha = mt_rand(0, count($this->linhas) - 1);
             }
 
             $linha = $this->linhas[$num_linha];

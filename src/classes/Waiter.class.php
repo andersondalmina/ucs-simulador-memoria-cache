@@ -50,9 +50,9 @@ class Waiter {
             validator::intVal()->min(0)->max(1)->setName('Política de Escrita')->assert($request->getParam('politica_escrita'));
             validator::intVal()->min(0)->max(2)->setName('Política de Substituição')->assert($request->getParam('politica_substituicao'));
 
-            validator::intVal()->multiple(2)->setName('Número de Linhas')->assert($request->getParam('numero_linhas'));
-            validator::intVal()->min(1)->max($request->getParam('numero_linhas'))->multiple(2)->setName('Linhas por Conjunto')->assert($request->getParam('linhas_conjunto'));
-            validator::intVal()->multiple(2)->setName('Tamanho da Linha')->assert($request->getParam('tamanho_linha'));
+            validator::intVal()->setName('Número de Linhas')->assert($request->getParam('numero_linhas'));
+            validator::intVal()->min(1)->max($request->getParam('numero_linhas'))->setName('Linhas por Conjunto')->assert($request->getParam('linhas_conjunto'));
+            validator::intVal()->setName('Tamanho da Linha')->assert($request->getParam('tamanho_linha'));
 
             validator::intVal()->setName('Tempo de acesso da memória cache')->assert($request->getParam('tempo_cache'));
             validator::intVal()->setName('Tempo de acesso da memória principal')->assert($request->getParam('tempo_memoria_principal'));
@@ -60,7 +60,13 @@ class Waiter {
             return false;
         }
 
-        return true;
+        if(($request->getParam('numero_linhas') & ($request->getParam('numero_linhas') - 1) == 0) &&
+            ($request->getParam('linhas_conjunto') & ($request->getParam('linhas_conjunto') - 1) == 0) &&
+            ($request->getParam('tamanho_linha') & ($request->getParam('tamanho_linha') - 1) == 0)){
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function calcularParteEndereco($int){
