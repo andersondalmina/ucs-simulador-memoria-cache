@@ -174,7 +174,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">Tempo Médio</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $cache_escritas_acertos; ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo $tempo_medio; ?>ns" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -192,12 +192,6 @@
                                         <input type="text" class="form-control" value="<?php echo $memoria_principal_leituras; ?>" disabled>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">Razão</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_leituras_acertos; ?>" disabled>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -206,18 +200,12 @@
                                         <input type="text" class="form-control" value="<?php echo $memoria_principal_escritas; ?>" disabled>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">Razão</label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_escritas_acertos; ?>" disabled>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">Acessos</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $cache_escritas; ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_leituras + $memoria_principal_escritas; ?>" disabled>
                                     </div>
                                 </div>
                             </div>

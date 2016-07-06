@@ -77,7 +77,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
         'tempo_medio' => 0
     ];
 
-	$address = $waiter->readFile('oficial.cache');
+	$address = $waiter->readFile('teste.cache');
     $params['linhas_arquivo'] = count($address);
 
 	foreach($address as $key => $options){
@@ -224,7 +224,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
     $tempoMedio = ((($resultados['cache_leituras_acertos_taxa']/100) * $params['tempo_cache']) +
             ((1 - ($resultados['cache_leituras_acertos_taxa']/100)) * ($params['tempo_cache'] + $params['tempo_memoria_principal'])));
 
-    $resultados['tempoMedio'] = $tempoMedio;
+    $resultados['tempo_medio'] = $tempoMedio;
     $resultados['params'] = $params;
 
     return $this->renderer->render($response, 'result.phtml', $resultados);
