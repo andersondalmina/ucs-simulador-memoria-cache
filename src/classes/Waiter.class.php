@@ -10,6 +10,7 @@ use Respect\Validation\Validator as validator;
 use Respect\Validation\Exceptions\NestedValidationException;
 
 class Waiter {
+    //Lê o arquivo e retorna as linhas
     public function readFile($file){
     	$buffer = fopen($file, "r") or die("Unable to open file!");
     	$address = [];
@@ -34,6 +35,7 @@ class Waiter {
 		return $address;
     }
 
+    //Converte número hexadecimal em binário
     public function convertHexadecimalToBinary($hexadecimal){
         $decimal = hexdec($hexadecimal);
         $binary = $this->convertDecimalToBinary($decimal);
@@ -41,10 +43,12 @@ class Waiter {
         return $binary;
     }
 
+    //Converte número decimal em binário
     public function convertDecimalToBinary($decimal){
     	return decbin($decimal);
     }
 
+    //Faz a validação do formulário
     public function validate(ServerRequestInterface $request){
         try {
             validator::intVal()->min(0)->max(1)->setName('Política de Escrita')->assert($request->getParam('politica_escrita'));
@@ -71,6 +75,7 @@ class Waiter {
         }
     }
 
+    //Quebra o endereço para retornar a parte certa de rótulo e conjunto
     public function calcularParteEndereco($int){
         $tamanho = 0;
         while($int != 1){

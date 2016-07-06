@@ -3,18 +3,21 @@
     Autor: Ânderson Zorrer Dalmina
 */
 
+//Importa as classes criadas
 require __DIR__ . '/../src/classes/Conjunto.class.php';
 require __DIR__ . '/../src/classes/Linha.class.php';
 require __DIR__ . '/../src/classes/MemoriaCache.class.php';
 require __DIR__ . '/../src/classes/MemoriaPrincipal.class.php';
 require __DIR__ . '/../src/classes/Waiter.class.php';
 
+//Rota para a página inicial
 $app->get('/[{name}]', function ($request, $response, $args){
 	$args['message'] = $this->flash->getMessages();
 
 	return $this->renderer->render($response, 'index.phtml', $args);
 });
 
+//Rota que realiza o processamento
 $app->post('/process', function($request, $response, $args) use ($app){
 	$waiter = new Waiter;
 
