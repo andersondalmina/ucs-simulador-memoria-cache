@@ -60,12 +60,14 @@ class Waiter {
             return false;
         }
 
-        if(($request->getParam('numero_linhas') & ($request->getParam('numero_linhas') - 1) == 0) &&
-            ($request->getParam('linhas_conjunto') & ($request->getParam('linhas_conjunto') - 1) == 0) &&
-            ($request->getParam('tamanho_linha') & ($request->getParam('tamanho_linha') - 1) == 0)){
-            return false;
-        } else {
+        $bin_linhas = decbin($request->getParam('numero_linhas'));
+        $bin_conjuntos = decbin($request->getParam('linhas_conjunto'));
+        $bin_tamanho = decbin($request->getParam('tamanho_linha'));
+        
+        if(preg_match('/^0*10*$/', $bin_linhas) && preg_match('/^0*10*$/', $bin_conjuntos) && preg_match('/^0*10*$/', $bin_tamanho)){
             return true;
+        } else {
+            return false;
         }
     }
 
