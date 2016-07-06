@@ -15,8 +15,8 @@ class MemoriaPrincipal {
     }
     
     public function search($endereco){
-        for($i = 0; $i < $this->total; $i++){
-            if($this->enderecos[$i] == $endereco){
+        foreach($this->enderecos as $cada_endereco){
+            if($cada_endereco == $endereco){
                 return true;
             }
         }

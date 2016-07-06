@@ -19,10 +19,7 @@
                 ?>
                     <div role="alert" class="alert alert-danger"> 
                     <?php 
-                        var_dump($message)."<br />";   
-                        foreach($message as $cada_message){
-                            var_dump($cada_message[0])."<br />";   
-                        }
+                        print_r($message['message'][0]);
                     ?>
                     </div>
                 <?php
@@ -38,19 +35,19 @@
                                 <div class="form-group">
                                     <label for="input_tam_linha" class="col-sm-4 control-label">Tamanho da Linha</label>
                                     <div class="col-sm-6">
-                                        <input type="number" name="tamanho_linha" class="form-control" id="input_tam_linha" min="0" placeholder="Tamanho da Linha">
+                                        <input type="number" name="tamanho_linha" class="form-control" id="input_tam_linha" min="0" placeholder="Tamanho da Linha" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="input_num_linhas" class="col-sm-4 control-label">Número de Linhas</label>
                                     <div class="col-sm-6">
-                                        <input type="number" name="numero_linhas" class="form-control" id="input_num_linhas" min="0" placeholder="Número de Linhas">
+                                        <input type="number" name="numero_linhas" class="form-control" id="input_num_linhas" min="0" placeholder="Número de Linhas" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="input_linhas_conjuntos" class="col-sm-4 control-label">Linhas por Conjuntos</label>
                                     <div class="col-sm-6">
-                                        <input type="number" name="linhas_conjunto" class="form-control" id="input_linhas_conjuntos" min="0" placeholder="Linhas por Conjuntos">
+                                        <input type="number" name="linhas_conjunto" class="form-control" id="input_linhas_conjuntos" min="0" placeholder="Linhas por Conjuntos" required>
                                     </div>
                                 </div>
                             </div>
@@ -58,7 +55,7 @@
                                 <div class="form-group">
                                     <label for="input_tempo_cache" class="col-sm-4 control-label">Tempo de Acesso</label>
                                     <div class="col-sm-6">
-                                        <input type="number" name="tempo_cache" class="form-control" id="input_tempo_cache" min="0" placeholder="Tempo de Acesso">
+                                        <input type="number" name="tempo_cache" class="form-control" id="input_tempo_cache" min="0" placeholder="Tempo de Acesso" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -81,12 +78,17 @@
                                     <div class="col-sm-6">
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="politica_substituicao" value="0" checked>LRU
+                                                <input type="radio" name="politica_substituicao" value="0" checked>LFU
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="politica_substituicao" value="1">Aleatória
+                                                <input type="radio" name="politica_substituicao" value="1">LRU
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="politica_substituicao" value="2">Aleatória
                                             </label>
                                         </div>
                                     </div>
@@ -103,7 +105,7 @@
                                 <div class="form-group">
                                     <label for="input_tempo_memoria_principal" class="col-sm-4 control-label">Tempo de Acesso</label>
                                     <div class="col-sm-6">
-                                        <input type="number" name="tempo_memoria_principal" class="form-control" id="input_tempo_memoria_principal" min="0" placeholder="Tempo de acesso">
+                                        <input type="number" name="tempo_memoria_principal" class="form-control" id="input_tempo_memoria_principal" min="0" placeholder="Tempo de acesso" required>
                                     </div>
                                 </div>
                             </div>

@@ -6,15 +6,10 @@ class Conjunto {
 	private $linhas;
 	private $conjunto;
 	private $tamanho;
-	private $prox;
 
     public function __construct($quantidade_linhas){
-        for($i = 0; $i < $quantidade_linhas; $i++){
-            $this->linhas[$i] = new Linha;
-        }
-        
-        $this->tamanho = $quantidade_linhas;
-        $this->prox = 0;
+        $this->linhas = array();
+        $this->tamanho = $quantidade_linhas;   
     }
 
     public function setConjunto($conjunto){
@@ -34,13 +29,14 @@ class Conjunto {
     }
 
 	public function procuraRotulo($rotulo){
-        for($i = 0; $i < $this->prox; $i++){
-            if($this->linhas[$i]->getRotulo() == $rotulo){
+        foreach($this->linhas as $cada_linha){
+            if($cada_linha->getRotulo() == $rotulo){
                 $data = Carbon::now()->timestamp;
-                $this->linhas[$i]->setUltimaUtilizacao($data);
+                $cada_linha->setAcessos($cada_linha->getAcessos() + 1);
+                $cada_linha->setUltimaUtilizacao($data);
                 
                 return true;
-            }
+            }    
         }
 
         return false;
@@ -49,45 +45,79 @@ class Conjunto {
     public function gravaRotulo($rotulo, $politica_substituicao, $politica_gravacao, $memoria_principal, $endereco){
         $data = Carbon::now()->timestamp;
 
-        if($this->prox == $this->tamanho){
-            if($politica_substituicao == 0){ //LRU
-                $linhaMenosRecUsada = $this->buscaUltimaUsada();
+        if(count($this->linhas) == $this->tamanho){
+            if($politica_substituicao == 0){ //LFU
+                $num_linha = $this->getLinhaLFU();
                 
-                if($politica_gravacao == 1){
-                    $memoria_principal->adicionaNaMP($this->linhas[$linhaMenosRecUsada]->getEnderecoTotal());
-                }
-
-                $this->linhas[$linhaMenosRecUsada]->setRotulo($rotulo, $endereco);
-                $this->linhas[$linhaMenosRecUsada]->setUltimaUtilizacao($data);
-            } else { //Aleatorio
-                $linhaAleatoria = rand(0, $this->tamanho);
-
-                if($politica_gravacao == 1){
-                    $memoria_principal->adicionaNaMP($this->linhas[$linhaAleatoria]->getEnderecoTotal());
-                }
-
-                $this->linhas[$linhaAleatoria]->setRotulo($rotulo, $endereco);
-                $this->linhas[$linhaAleatoria]->setUltimaUtilizacao($data);
+            } else if($politica_substituicao == 1){ //LRU
+                $num_linha = $this->getLinhaLRU();
+            
+            } else { //aleatoria
+                $num_linha = rand(0, count($this->linhas));
             }
+
+            $linha = $this->linhas[$num_linha];
+
+            if($politica_gravacao == 0){ //Write-Through
+                $memoria_principal->add($linha->getEndereco());
+            } else {
+                if($linha->getDirtyBit() == 1){ //Write-Back
+                    $memoria_principal->add($linha->getEndereco());
+                }
+            }
+
+            $linha->setRotulo($rotulo, $endereco);
+            $linha->setAcessos($linha->getAcessos() + 1);
+            $linha->setUltimaUtilizacao($data);
+            $linha->setDirtyBit(1);
+
         } else {
-            $this->linhas[$this->prox] = new Linha();
-            $this->linhas[$this->prox]->setRotulo($rotulo, $endereco);
-            $this->linhas[$this->prox]->setUltimaUtilizacao($data);
-            $this->prox++;
+            $linha = new Linha();
+            $linha->setRotulo($rotulo, $endereco);
+            $linha->setAcessos($linha->getAcessos() + 1);
+            $linha->setUltimaUtilizacao($data);
+
+            array_push($this->linhas, $linha);
         }
+
+        return $linha->getDirtyBit();
     }
     
-    public function buscaUltimaUsada(){
-        $aux = $this->linhas[0]->getUltimaUtilizacao();
-        $menosUsado = 0;
-        for($i = 0; $i < $this->tamanho; $i++){
-            if($this->linhas[$i]->getUltimaUtilizacao() < $aux){
-                $aux = $this->linhas[$i]->getUltimaUtilizacao();
-                $menosUsado = $i;
+    //retorna linha menos acessada recentemente
+    public function getLinhaLRU(){
+        if(count($this->linhas) > 0){
+            $aux = $this->linhas[0]->getUltimaUtilizacao();
+            $linha_menos_acessada = 0;
+
+            foreach($this->linhas as $key => $cada_linha){
+                if($cada_linha->getUltimaUtilizacao() < $aux){
+                    $aux = $cada_linha->getUltimaUtilizacao();
+                    $linha_menos_acessada = $key;
+                }
             }
+
+            return $linha_menos_acessada;
+        } else {
+            return false;
         }
-        
-        return $menosUsado;
+    }
+
+    public function getLinhaLFU(){
+        if(count($this->linhas) > 0){
+            $aux = $this->linhas[0]->getAcessos();
+            $linha_menos_acessada = 0;
+
+            foreach($this->linhas as $key => $cada_linha){
+                if($cada_linha->getAcessos() < $aux){
+                    $aux = $cada_linha->getAcessos();
+                    $linha_menos_acessada = $key;
+                }
+            }
+
+            return $linha_menos_acessada;
+        } else {
+            return false;
+        }
     }
 }
 

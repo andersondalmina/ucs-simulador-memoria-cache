@@ -3,17 +3,12 @@
 class MemoriaCache {
     private $conjuntos;
     private $tamanho;
-    private $proximo;
+    private $conjunto_quantidade_linhas;
 
     public function __construct($quantidade_conjuntos, $quantidade_linhas){
         $this->conjuntos = array();
         $this->tamanho = $quantidade_conjuntos;
-
-        for($i = 0; $i < $this->tamanho; $i++){
-            $this->conjuntos[$i] = new Conjunto($quantidade_linhas);
-        }
-
-        $this->proximo = 0;
+        $this->conjunto_quantidade_linhas = $quantidade_linhas;
     }
 
     public function setConjuntos($conjuntos) {
@@ -25,9 +20,11 @@ class MemoriaCache {
     }
     
     public function procuraConjunto($endereco){
-        for($i = 0; $i < $this->proximo; $i++){
-            if($this->conjuntos[$i]->getConjunto() == $endereco){
-                return $this->conjuntos[$i];
+        if(is_array($this->conjuntos)){
+            foreach($this->conjuntos as $cada_conjunto){
+                if($cada_conjunto->getConjunto() == $endereco){
+                    return $cada_conjunto;
+                }
             }
         }
 
@@ -35,11 +32,13 @@ class MemoriaCache {
     }
     
     public function gravaConjunto($enderecoConjunto){
-        if($this->proximo < $this->tamanho){
-            $this->conjuntos[$this->proximo]->setConjunto($enderecoConjunto);
-            $this->proximo++;
+        if(count($this->conjuntos) < $this->tamanho){
+            $conjunto = new Conjunto($this->conjunto_quantidade_linhas);
+            $conjunto->setConjunto($enderecoConjunto);
 
-            return $this->conjuntos[$this->proximo - 1];
+            array_push($this->conjuntos, $conjunto);
+            
+            return $conjunto;
         }
 
         return null;

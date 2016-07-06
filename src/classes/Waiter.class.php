@@ -1,5 +1,8 @@
 <?php 
 
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+
 use Respect\Validation\Validator as validator;
 use Respect\Validation\Exceptions\NestedValidationException;
 
@@ -33,7 +36,7 @@ class Waiter {
     	return decbin($decimal);
     }
 
-    public function validate($request){
+    public function validate(ServerRequestInterface $request){
         try {
             validator::intVal()->min(0)->max(1)->setName('Política de Escrita')->assert($request->getParam('politica_escrita'));
             validator::intVal()->min(0)->max(1)->setName('Política de Substituição')->assert($request->getParam('politica_substituicao'));
@@ -45,16 +48,10 @@ class Waiter {
             validator::intVal()->setName('Tempo de acesso da memória cache')->assert($request->getParam('tempo_cache'));
             validator::intVal()->setName('Tempo de acesso da memória principal')->assert($request->getParam('tempo_memoria_principal'));
         } catch(NestedValidationException $exception){
-            $errors = $exception->findMessages([
-                'intVal' => '{{name}} deve ser um número válido!',
-                'min' => '{{name}} deve ser no mínimo 1',
-                'max' => '{{name}} deve ser no máximo '.$request->getParam('numero_linhas'),
-                'multiple' => '{{name}} deve ser potência de 2',
-            ]);
-
-            $this->flash->addMessage('error', $errors);
-            return $response->withHeader('Location', '/');
+            return false;
         }
+
+        return true;
     }
 
     public function calcularParteEndereco($int){

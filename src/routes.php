@@ -12,11 +12,16 @@ $app->get('/[{name}]', function ($request, $response, $args){
 	return $this->renderer->render($response, 'index.phtml', $args);
 });
 
-$app->post('/process', function($request, $response, $args){
+$app->post('/process', function($request, $response, $args) use ($app){
 	$waiter = new Waiter;
 
 	//Valida formulário
-	$waiter->validate($request);
+	$validou = $waiter->validate($request);
+    if($validou == false){
+        $this->flash->addMessage('message', 'Informações inválidas. Verifique se foi preenchido todo o formulário e se os campos (Tamanho da Linha, Número de Linhas) são potências de 2.');
+
+        return $response->withHeader('Location', '/');
+    }
 	
     //Recebe parametros para a simulação
 	$params['politica_escrita'] = $request->getParam('politica_escrita');
@@ -75,8 +80,10 @@ $app->post('/process', function($request, $response, $args){
         //preenche com zeros na frente para ficar com 32 digitos
         $endereco = str_pad($endereco, 32, "0", STR_PAD_LEFT);
 
-        //Busca os endereços
+        //define parte do endereco de rotulo
         $endereco_rotulo = substr($endereco, 0, $tamanho_rotulo);
+
+        //define parte do endereco do conjunto
         $endereco_conjunto = substr($endereco, $tamanho_rotulo + 1, $tamanho_conjunto);
 
         if($operacao == "R"){
@@ -106,12 +113,11 @@ $app->post('/process', function($request, $response, $args){
                     $resultados['memoria_principal_leituras_acertos']++;
                 }
             } else {
-                //Se conjunto não existe grava
+                //Se conjunto não existe grava na cache
                 $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto);
 
-                if(!is_null($conjunto)){
-	                $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-	        	}
+                //salva rotulo no conjunto
+                $dirty_bit = $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
 
                 //Soma um na leitura da memória principal
                 $resultados['memoria_principal_leituras']++;
@@ -121,46 +127,45 @@ $app->post('/process', function($request, $response, $args){
         } else {
             $resultados['escritas']++;
             
+            //procura conjunto na cache
+            $conjunto = $memoriaCache->procuraConjunto($endereco_conjunto);
+
+            $resultados['cache_escritas']++;
+
             if($params['politica_escrita'] == 0){ //Write Through
-                $conjunto = $memoriaCache->procuraConjunto($endereco_conjunto);
-
-                $resultados['cache_escritas']++;
-
                 if(is_null($conjunto)){
                     $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto);
-                    if(!is_null($conjunto)){
-                    	$conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-                	}
+                    $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+
+                } else {
+                    $encontrou_rotulo = $conjunto->procuraRotulo($endereco_rotulo);
                     
-                }else{
-                    $retornoRotulo = $conjunto->procuraRotulo($endereco_rotulo);
-                    if(!$retornoRotulo){
-                        $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-                        
-                    }else{
+                    if($encontrou_rotulo == true){
                         $resultados['cache_escritas_acertos']++;
+                        
+                    } else {
+                        $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
                     }
                 }
+
                 $resultados['memoria_principal_escritas']++;
                 $resultados['memoria_principal_escritas_acertos']++;
-            }else{ //Write Back
-                $conjunto = $memoriaCache->procuraConjunto($endereco_conjunto);
-
-                $resultados['cache_escritas']++;
-                
+            } else { //Write Back
                 if(is_null($conjunto)){
                     $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto); 
-                    if(!is_null($conjunto)){
-                    	$conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-                	}
-                    
+                	$dirty_bit = $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
+
+                    if($dirty_bit == 1){
+                        $resultados['memoria_principal_escritas']++;
+                    }
                 }else{
-                    $retornoRotulo = $conjunto->procuraRotulo($endereco_rotulo);
-                    if(!$retornoRotulo){
-                        $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-                        
-                    }else{
+                    $encontrou_rotulo = $conjunto->procuraRotulo($endereco_rotulo);
+
+                    if($encontrou_rotulo == true){
                         $resultados['cache_escritas_acertos']++;
+                        
+                    } else {
+                        $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
                     }
                 }
             }

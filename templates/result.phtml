@@ -73,7 +73,11 @@
                                     <label class="col-sm-4 control-label">Política de Substituição</label>
                                     <div class="col-sm-6">
                                         <?php 
-                                            if($params['politica_escrita'] == 0):
+                                            if($params['politica_substituicao'] == 0):
+                                        ?>
+                                        <input type="text" class="form-control" value="LFU" disabled>
+                                        <?php 
+                                            elseif($params['politica_substituicao'] == 1):
                                         ?>
                                         <input type="text" class="form-control" value="LRU" disabled>
                                         <?php 
@@ -158,13 +162,13 @@
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">Leituras</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $cache_leituras; ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_leituras; ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">Razão</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $cache_leituras_acertos; ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_leituras_acertos; ?>" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -172,13 +176,13 @@
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">Escritas</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $cache_escritas; ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_escritas; ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">Razão</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" value="<?php echo $cache_escritas_acertos; ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo $memoria_principal_escritas_acertos; ?>" disabled>
                                     </div>
                                 </div>
                             </div>

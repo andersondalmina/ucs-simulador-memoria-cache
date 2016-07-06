@@ -1,5 +1,6 @@
 <?php
 set_time_limit(60);
+session_start();
 
 if (PHP_SAPI == 'cli-server') {
     // To help the built-in PHP dev server, check if the request was actually for
@@ -12,8 +13,6 @@ if (PHP_SAPI == 'cli-server') {
 }
 
 require __DIR__ . '/../vendor/autoload.php';
-
-session_start();
 
 // Instantiate the app
 $settings = require __DIR__ . '/../src/settings.php';
@@ -28,8 +27,10 @@ require __DIR__ . '/../src/middleware.php';
 // Register routes
 require __DIR__ . '/../src/routes.php';
 
-// Register Flash Data Plugin
+// Fetch DI Container
 $container = $app->getContainer();
+
+// Register provider
 $container['flash'] = function () {
     return new \Slim\Flash\Messages();
 };
