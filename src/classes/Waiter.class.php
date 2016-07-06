@@ -1,4 +1,7 @@
 <?php 
+/*---------------------------------------------------
+    Autor: Ânderson Zorrer Dalmina
+*/
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -14,10 +17,16 @@ class Waiter {
 		while(!feof($buffer)){
 			$line = fgets($buffer);
 
-			$options['address'] = $this->convertHexadecimalToBinary(substr($line, 0, 8));
-			$options['operation'] = substr($line, -2, 1);
+            if(strlen($line) > 0){
+			    $options['address'] = $this->convertHexadecimalToBinary(substr($line, 0, 8));
+    			$options['operation'] = substr($line, -2, 1);
 
-			array_push($address, $options);
+                if($options['operation'] == ' '){
+                    $options['operation'] = substr($line, -1, 1);                
+                }
+
+    			array_push($address, $options);
+            }
 		}
 
 		fclose($buffer);
@@ -39,7 +48,7 @@ class Waiter {
     public function validate(ServerRequestInterface $request){
         try {
             validator::intVal()->min(0)->max(1)->setName('Política de Escrita')->assert($request->getParam('politica_escrita'));
-            validator::intVal()->min(0)->max(1)->setName('Política de Substituição')->assert($request->getParam('politica_substituicao'));
+            validator::intVal()->min(0)->max(2)->setName('Política de Substituição')->assert($request->getParam('politica_substituicao'));
 
             validator::intVal()->multiple(2)->setName('Número de Linhas')->assert($request->getParam('numero_linhas'));
             validator::intVal()->min(1)->max($request->getParam('numero_linhas'))->multiple(2)->setName('Linhas por Conjunto')->assert($request->getParam('linhas_conjunto'));

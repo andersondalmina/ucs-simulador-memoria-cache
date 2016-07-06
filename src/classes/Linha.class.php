@@ -1,4 +1,7 @@
 <?php 
+/*---------------------------------------------------
+    Autor: Ânderson Zorrer Dalmina
+*/
 
 class Linha {
     private $rotulo;

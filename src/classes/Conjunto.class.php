@@ -1,4 +1,7 @@
 <?php 
+/*---------------------------------------------------
+    Autor: Ânderson Zorrer Dalmina
+*/
 
 use Carbon\Carbon;
 
@@ -57,7 +60,7 @@ class Conjunto {
             }
 
             $linha = $this->linhas[$num_linha];
-
+            
             if($politica_gravacao == 0){ //Write-Through
                 $memoria_principal->add($linha->getEndereco());
             } else {
@@ -102,6 +105,7 @@ class Conjunto {
         }
     }
 
+    //retorna linha menos acessada frequentemente
     public function getLinhaLFU(){
         if(count($this->linhas) > 0){
             $aux = $this->linhas[0]->getAcessos();

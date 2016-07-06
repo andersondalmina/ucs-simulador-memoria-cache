@@ -1,4 +1,7 @@
 <?php 
+/*---------------------------------------------------
+    Autor: Ânderson Zorrer Dalmina
+*/
 
 class MemoriaCache {
     private $conjuntos;

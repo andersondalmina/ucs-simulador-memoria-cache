@@ -1,4 +1,7 @@
 <?php
+/*---------------------------------------------------
+    Autor: Ânderson Zorrer Dalmina
+*/
 
 require __DIR__ . '/../src/classes/Conjunto.class.php';
 require __DIR__ . '/../src/classes/Linha.class.php';
@@ -24,13 +27,16 @@ $app->post('/process', function($request, $response, $args) use ($app){
     }
 	
     //Recebe parametros para a simulação
-	$params['politica_escrita'] = $request->getParam('politica_escrita');
-	$params['politica_substituicao'] = $request->getParam('politica_substituicao');
+	$params['politica_escrita'] = (int) $request->getParam('politica_escrita');
+	$params['politica_substituicao'] = (int) $request->getParam('politica_substituicao');
 	$params['numero_linhas'] = $request->getParam('numero_linhas');
 	$params['linhas_conjunto'] = $request->getParam('linhas_conjunto');
 	$params['tamanho_linha'] = $request->getParam('tamanho_linha');
 	$params['tempo_cache'] = $request->getParam('tempo_cache');
 	$params['tempo_memoria_principal'] = $request->getParam('tempo_memoria_principal');
+    $params['linhas_arquivo'] = 0;
+    $params['linhas_leituras_arquivo'] = 0;
+    $params['linhas_escritas_arquivo'] = 0;
 
 	//Tamanho total da Cache (capacidade)
     $tamanho_cache = $params['numero_linhas'] * $params['tamanho_linha'];
@@ -71,7 +77,8 @@ $app->post('/process', function($request, $response, $args) use ($app){
         'tempo_medio' => 0
     ];
 
-	$address = $waiter->readFile('teste.cache');
+	$address = $waiter->readFile('oficial.cache');
+    $params['linhas_arquivo'] = count($address);
 
 	foreach($address as $key => $options){
 		$endereco = $options['address'];
@@ -87,6 +94,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
         $endereco_conjunto = substr($endereco, $tamanho_rotulo + 1, $tamanho_conjunto);
 
         if($operacao == "R"){
+            $params['linhas_leituras_arquivo']++;
             $resultados['leituras']++;
             
             //procura na cache o endereço do conjunto
@@ -97,34 +105,49 @@ $app->post('/process', function($request, $response, $args) use ($app){
 
             //Se conjunto existe na cache
             if($conjunto != null){
-                //Procura o rotulo do conjunto
+                //Procura o rotulo das linhas do conjunto
                 $conjunto_rotulo = $conjunto->procuraRotulo($endereco_rotulo);
                 
                 //Se rótulo existe
                 if(!is_null($conjunto_rotulo)){
                     //Soma um no acertos de leitura da cache
                     $resultados['cache_leituras_acertos']++;
-                }else{
-                    //Se rótulo não existe grava
-                    $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-
+                } else {
+                    $encontrou_mp = $memoriaPrincipal->search($endereco);
                     //Soma um na leitura da memória principal
                     $resultados['memoria_principal_leituras']++;
-                    $resultados['memoria_principal_leituras_acertos']++;
+
+                    if($encontrou_mp == true){
+                        $resultados['memoria_principal_leituras_acertos']++;    
+                    } else {
+                        $memoriaPrincipal->add($endereco);
+                    }
+
+                    //Se rótulo não existe grava
+                    $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
                 }
             } else {
+                //procura na memória principal
+                $encontrou_mp = $memoriaPrincipal->search($endereco);
+
+                $resultados['memoria_principal_leituras']++;
+
+                if($encontrou_mp == true){
+                    $resultados['memoria_principal_leituras_acertos']++;    
+
+                } else {
+                    $memoriaPrincipal->add($endereco);
+                }
+
                 //Se conjunto não existe grava na cache
                 $conjunto = $memoriaCache->gravaConjunto($endereco_conjunto);
 
                 //salva rotulo no conjunto
-                $dirty_bit = $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
-
-                //Soma um na leitura da memória principal
-                $resultados['memoria_principal_leituras']++;
-                $resultados['memoria_principal_leituras_acertos']++;
+                $conjunto->gravaRotulo($endereco_rotulo, $params['politica_substituicao'], $params['politica_escrita'], $memoriaPrincipal, $endereco);
             }
 
         } else {
+            $params['linhas_escritas_arquivo']++;
             $resultados['escritas']++;
             
             //procura conjunto na cache
@@ -158,7 +181,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
                     if($dirty_bit == 1){
                         $resultados['memoria_principal_escritas']++;
                     }
-                }else{
+                } else {
                     $encontrou_rotulo = $conjunto->procuraRotulo($endereco_rotulo);
 
                     if($encontrou_rotulo == true){
@@ -170,8 +193,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
                 }
             }
         }
-	} 
-
+	}
 
     //RESULTADOS
     $resultados['total_operacoes'] = $resultados['leituras'] + $resultados['escritas'];
@@ -203,6 +225,7 @@ $app->post('/process', function($request, $response, $args) use ($app){
             ((1 - ($resultados['cache_leituras_acertos_taxa']/100)) * ($params['tempo_cache'] + $params['tempo_memoria_principal'])));
 
     $resultados['tempoMedio'] = $tempoMedio;
+    $resultados['params'] = $params;
 
     return $this->renderer->render($response, 'result.phtml', $resultados);
 });

@@ -1,7 +1,7 @@
 <?php
 return [
     'settings' => [
-        'displayErrorDetails' => true, // set to false in production
+        'displayErrorDetails' => false, // set to false in production
 
         // Renderer settings
         'renderer' => [
@@ -15,8 +15,8 @@ return [
         ],
     ],
 
-    /*'errorHandler' => function(){
-        echo('<H1>Error!</h1>');
+    'errorHandler' => function(){
+        echo('<H1>Um Erro Ocorreu!</h1>');
         exit();
-    }*/
+    }
 ];

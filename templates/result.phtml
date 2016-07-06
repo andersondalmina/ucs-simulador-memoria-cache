@@ -92,6 +92,33 @@
                             </div>
                         </div> 
                     </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> 
+                            <h3 class="panel-title">Informações do Arquivo</h3> 
+                        </div> 
+                        <div class="panel-body"> 
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Número de Linhas:</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['linhas_arquivo']; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="input_num_linhas">Linhas de Leitura</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['linhas_leituras_arquivo']; ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="input_linhas_conjuntos">Linhas de Escrita</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" value="<?php echo $params['linhas_escritas_arquivo']; ?>" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
                     <div class="panel panel-primary">
                         <div class="panel-heading"> 
                             <h3 class="panel-title">Resultados na Memória Cache</h3> 
